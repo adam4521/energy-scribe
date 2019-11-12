@@ -39,7 +39,7 @@ Read one line of power values (W) from up to nine wireless current cost meters c
 Writes vaules to `stdout` as CSV text with timestamp.
 
 ### `hiking_dds238_2.py`
-Read one line of electrical values (V, A, W, VAR, pf, freq, kWh). Write values to `stdout` as CSV text with timestamp.
+Read one line of electrical values (V, A, W, VAR, pf, freq, kWh) from the Hiking DDS238-2 modbus meter. Write values to `stdout` as CSV text with timestamp.
 
 
 
