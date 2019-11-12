@@ -2,8 +2,8 @@
 ## kwh meter reading and logging
 
 Target device is Raspberry Pi version 2 or later.
-Electrical meter with serial or modbus adapter is connected to RaPi.
-Uses RaPi blinkt LED hardware shield for running status display.
+Electrical meter with serial or modbus ad2apter is connected to RaPi.
+Uses RaPi blinkt LED hardware shield for "running status" display.
 The project consists of the following files:
 
 ### `auto.sh`
@@ -20,7 +20,7 @@ Will recover and reconnect if there is an interruption to the serial interface.
 Will exit with error 1 if the USB stick is detached or path not found.
 
 Status LEDs:
-* 0 Purple: program is running
+* 0 Purple: program is running, Red: program halted
 * 1 Green: acquisition running, Red: acquisition failed
 * 2 Blue: log writing, Red: log writing failed.
 
