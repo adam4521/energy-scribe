@@ -13,13 +13,12 @@ colours = { 'red': (200,0,0), 'green': (0,200,0), 'blue': (0,0,200), 'yellow': (
         'cyan': (0,200,200), 'magenta': (200,0,200), 'white': (200,200,200), 'off': (0,0,0) }
 
 
-if __name__ == '__main__':
-    try:
-        colour = colours[sys.argv[2]]
-        blinkt.set_pixel(sys.argv[1], colour[0], colour[1], colour[2])
-    except:
-        sys.stderr.write('Colour or pixel not recognised.\n')
-        sys.exit(1)
+try:
+    colour = colours[sys.argv[2]]
+    blinkt.set_pixel(sys.argv[1], colour[0], colour[1], colour[2])
+except:
+    sys.stderr.write('Colour or pixel not recognised.\n')
+    sys.exit(1)
 
 
 
