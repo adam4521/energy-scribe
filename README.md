@@ -31,7 +31,7 @@ Reads out the device IP address as a succession of coloured LED codes.
 * 9 = Three blue leds, gap, three blue leds.
 * DOT = Two white leds.
 
-### `blinkt.py`
+### `blinkt_indicator.py`
 Test the blinkt hardware.
 
 ### `current_cost.py`
