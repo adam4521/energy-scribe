@@ -65,23 +65,21 @@ def get_ip():
     return IP
 
 
-if __name__ == '__main__':
-    blinkt.set_clear_on_exit(False)
-    blinkt.clear()
-    blinkt.show()
-    try:
-        for char in get_ip():
-            if char == '.':
-                display_dot()
-                time.sleep(3)
-                blinkt.clear()
-                blinkt.show()
-            else: 
-                display_number(int(char))
-                time.sleep(2)
-                blinkt.clear()
-                blinkt.show()
-    except:
-        sys.stderr.write('Character in string not recognised.\n')
-        sys.exit(1)
+blinkt.set_clear_on_exit(False)
+blinkt.clear()
+blinkt.show()
+try:
+    for char in get_ip():
+        if char == '.':
+            display_dot()
+            time.sleep(3)
+        else: 
+            display_number(int(char))
+            time.sleep(2)
+        blinkt.clear()
+        blinkt.show()
+
+except:
+    sys.stderr.write('Character in string not recognised.\n')
+    sys.exit(1)
 
