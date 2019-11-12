@@ -13,7 +13,7 @@ Script will restart if the continuous_read.py program terminates.
 ### `continuous_read.py`
 Provides a timed loop to read from meter(s) and write values to USB stick.
 Indicates status/health on LED blinkt shield.
-Calls a sub-process to actually acquire the readings, collecting from stdout.
+Calls a sub-process to actually acquire the readings, collecting from sub-process `stdout`.
 Edit this file to point to a different acquisition program or to change the path for data logging.
 Default is to log data to a new CSV file in a kwhmeter folder on a USB stick.
 Will recover and reconnect if there is an interruption to the serial interface.
