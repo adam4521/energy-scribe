@@ -2,7 +2,7 @@
 ## kwh meter reading and logging
 
 Target device is Raspberry Pi version 2 or later.
-Electrical meter with serial or modbus ad2apter is connected to RaPi.
+Electrical meter with serial or modbus adapter is connected to RaPi.
 Uses RaPi blinkt LED hardware shield for "running status" display.
 The project consists of the following files:
 
