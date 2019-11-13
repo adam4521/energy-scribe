@@ -3,7 +3,8 @@
 
 Target device is Raspberry Pi version 2 or later.
 Electrical meter with serial or modbus adapter is connected to RaPi.
-Uses RaPi blinkt LED hardware shield for "running status" display.
+Uses RaPi blinkt LED hardware shield for status display.
+Currently supports Current Cost CC128 energy monitor and Hiking DDS238-2 ZN/S single phase meter.
 The project consists of the following files:
 
 ### `auto.sh`
@@ -33,6 +34,8 @@ Reads out the device IP address as a succession of coloured LED codes.
 
 ### `blinkt_indicator.py`
 Test the blinkt hardware.
+Usage: `./blinkt_indicator.py 2 red` turns LED 2 red.
+`./blinkt_indicator 2 off` turns LED 2 off.
 
 ### `current_cost.py`
 Read one line of power values (W) from up to nine wireless current cost meters connected to the base station.
