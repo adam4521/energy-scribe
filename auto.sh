@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # wait to make sure usb stick is automounted
-sleep 5
+sleep 10
 
 # make the directory of this script the current working directory
 cd "$(dirname "${BASH_SOURCE[0]}")"
