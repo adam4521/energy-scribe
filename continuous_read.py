@@ -13,10 +13,13 @@ TIME_SLICE = 10.0
 
 # Select meter hardware
 # Uncomment READMETER and CSVHEADERS to switch to different meter hardware
-READMETER = './current_cost.py'
-CSVHEADERS = '"Time", "Watts #1", "Watts #2", "Watts #3", "Watts #4", "Watts #5", "Watts #6", "Watts #7", "Watts #8", "Watts #9"'
+#READMETER = './current_cost.py'
+#CSVHEADERS = '"Time", "Watts #1", "Watts #2", "Watts #3", "Watts #4", "Watts #5", "Watts #6", "Watts #7", "Watts #8", "Watts #9"'
 #READMETER = './hiking_dds238_2.py'
 #CSVHEADERS = '"Time","Voltage","Current","Power","Reactive power","Power factor","Frequency","Cumulative energy"'
+READMETER = './schneider_iEM2150.py'
+CSVHEADERS = '"Time","Voltage","Current","Power","Reactive power","Power factor","Power factor direction","Frequency","Cumulative energy"'
+
 
 COLOURS = { 'red': (200,0,0), 'green': (0,200,0), 'blue': (0,0,200), 'yellow': (200,200,0),\
         'cyan': (0,200,200), 'magenta': (200,0,200), 'white': (200,200,200), 'off': (0,0,0) }
