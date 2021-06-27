@@ -11,6 +11,7 @@ import datetime
 import time
 import sys
 import os
+import glob
 import serial.tools.list_ports
 
 # on Ubuntu, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
@@ -140,14 +141,49 @@ def print_all_readings(instrument):
         sys.stderr.write('Failed to complete read of instrument state.\n')
         raise ConnectionError('Modbus error')
 
+
+semaphore = '/dev/shm/rs485.pid' + str(os.getpid()) + '.wants-it'
+
+def raise_semaphore():
+    try:
+        open(semaphore, 'w').close()
+        os.utime(semaphore, None)
+    except:
+        sys.stderr.write("Couldn't raise semaphore.\n")
+
+def clear_semaphore():
+    try:
+        os.unlink(semaphore)
+    except:
+        sys.stderr.write("Couldn't clear semaphore.\n")
+
+def check_semaphores():
+    return len(glob.glob('/dev/shm/rs485*'))
+
+def clear_other_semaphores():
+    for f in glob.glob('/dev/shm/rs485*'):
+        if f != semaphore:
+            os.unlink(f)
+
+
 try:
     port = find_serial_device()
+    raise_semaphore()
+    c = 0  # counter
+    while check_semaphores() > 1:
+        time.sleep(0.5)
+        c = c + 1
+        if c > 10:
+            clear_other_semaphores()  # don't wait forever, clear blockers eventually
+
     instrument = configure(port)
     print_csv_all_readings(instrument)
+    clear_semaphore()
 
 except ConnectionError:
     sys.stderr.write('Error communicating with hardware.\n')
     sys.exit(1)
+
 
 
         
