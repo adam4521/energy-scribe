@@ -30,8 +30,6 @@ def clear_other_semaphores():
             os.unlink(f)
 
 try:
-#    ser=serial.Serial('/dev/ttyUSB0')
-#    print(ser.name)
     raise_semaphore()
     c = 0  # counter
     while check_semaphores() > 1:
@@ -49,19 +47,15 @@ try:
     instrument.serial.timeout = 0.5
  
 
-    information1 = instrument.read_string(29,20)
-    information2 = instrument.read_string(49,20)
-    information3 = instrument.read_string(69,20)
-    print(information1)
-    print(information2)
-    print(information3)
-
-
+    print(instrument.read_string(29,20))
+    print(instrument.read_string(49,20))
+    print(instrument.read_string(69,20))
     print("Current: ", instrument.read_float(2999))
     print("Voltage: ", instrument.read_float(3027))
     print("Active Power: ", instrument.read_float(3053), "kW")
     print("Reactive Power: ", instrument.read_float(3067), "kVAR")
     print("Apparent Power: ", instrument.read_float(3075), "kVA")
+
     # need to process quadrant information in the datasheet
     pf = instrument.read_float(3083)
     if pf < 0:
@@ -75,8 +69,6 @@ try:
         else:
             print("Power factor: ", pf, " lagging")
 
-  
-
     print("Cumulative active energy: ", instrument.read_float(45099), "Wh")
     print("Cumulative reactive energy: ", instrument.read_float(45101), "VARh")
 
@@ -85,7 +77,7 @@ try:
 
 except:
     sys.stderr.write("Failed to operate the serial port.\n")
-#    clear_semaphore()
+    clear_semaphore()
     exit(1)
 
 
