@@ -14,20 +14,28 @@ def raise_semaphore():
         os.utime(semaphore, None)
     except:
         sys.stderr.write("Couldn't raise semaphore.\n")
+        exit(1)
 
 def clear_semaphore():
     try:
         os.unlink(semaphore)
     except:
         sys.stderr.write("Couldn't clear semaphore.\n")
+        exit(1)
 
 def check_semaphores():
     return len(glob.glob('/dev/shm/rs485*'))
 
 def clear_other_semaphores():
-    for f in glob.glob('/dev/shm/rs485*'):
-        if f != semaphore:
-            os.unlink(f)
+    try:	
+        for f in glob.glob('/dev/shm/rs485*'):
+            if f != semaphore:
+                os.unlink(f)
+    except:
+        sys.stderr.write("Couldn't delete/unlink semaphore file.\n")
+        exit(1)
+
+# starts here
 
 try:
     raise_semaphore()

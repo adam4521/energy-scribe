@@ -6,15 +6,20 @@
 # On Ubuntu and similar systems, the serial ports have root user permissions.
 # To change this, add ordinary user to the 'dialout' security group.
 # sudo usermod -a -G dialout $USER
-# requires minimalmodbus library: sudo pip3 install minimalmodbus
+# requires minimalmodbus and posix_ipc libraries: sudo pip3 install minimalmodbus posix_ipc
 
 import minimalmodbus
 import datetime
 import time
 import sys
 import os
-import glob
 import serial.tools.list_ports
+import posix_ipc as px
+
+BAUDRATE = 9600
+TIMEOUT = 2    # wait for rs485_semaphore lock for up to 2 seconds  
+
+
 
 # on Ubuntu, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
 # on Windows, serial ports are in the form 'COMx' where x is an integer 1-8
@@ -35,7 +40,7 @@ def find_serial_device():
 def configure(port):
     try:
         instrument = minimalmodbus.Instrument(port, 1, mode='rtu')
-        instrument.serial.baudrate = 9600
+        instrument.serial.baudrate = BAUDRATE
         instrument.serial.bytesize = 8
         instrument.serial.stopbits = 1
         instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -145,15 +150,57 @@ def print_all_readings(instrument):
 
 
 
+# starts here
+# the semaphore code allows communication with other process(es) so that they can
+# use the RS485 bus without collision.  
+
 try:
+    # find out first serial port
     port = find_serial_device()
+    
+    # get a connection to an existing operating system semaphore called "/rs485"
+    # or create a new one if it doesn't already exist.
+    rs485_semaphore = px.Semaphore("/rs485", flags=px.O_CREAT, initial_value=1)
+
+    # while we are using the serial bus, decrement the semaphore
+    # this function will block and wait if semaphore value=0 already
+    rs485_semaphore.acquire(TIMEOUT)
+
+    # we're clear to proceed: operate the RS485 bus
     instrument = configure(port)
     print_csv_all_readings(instrument)
 
-except ConnectionError:
-    sys.stderr.write('Error communicating with hardware.\n')
+    # we're done, increment and close the semaphore object.
+    rs485_semaphore.release()
+    rs485_semaphore.close()
+
+except px.BusyError:
+    # if we reach here the .acquire() function blocked for longer than
+    # TIMEOUT indicating another process failed to clear the semaphore
+    # quickly and may be deadlocked or hanging. The .unlink() will dispose
+    # of the underlying semaphore on the system and allow a fresh semaphore
+    # IPC object to be created next time. This will allow error recovery but
+    # you must check for stuck processes and underlying cause if you see
+    # this error.
+    sys.stderr.write("RS485 semaphore stayed busy for too long: unlinking.\n")
+    rs485_semaphore.unlink()
+    rs485_semaphore.close()
     sys.exit(1)
 
+except ConnectionError:
+    # if we reach here we likely have had an I/O error on the serial port.
+    sys.stderr.write("System error: probably serial port IO.\n")
+    rs485_semaphore.release()
+    rs485_semaphore.close()
+    sys.exit(1)
+
+except:
+    sys.stderr.write("Unresolved exception.")
+    rs485_semaphore.release()
+    rs485_semaphore.close()
+    sys.exit(1)
+
+   
 
 
         
