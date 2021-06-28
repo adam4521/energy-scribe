@@ -55,13 +55,15 @@ def get_timestamp():
     return time.strftime('%Y/%m/%d %H:%M:%S', now)
 
 def pf_adjust(pf_raw):
-    if pf_raw < 0:
+    if pf_raw != pf_raw:  # deals with NaN special case
+        return 1.0, "leading"
+    elif pf_raw < 0:
         if pf_raw < -1:
             return -2-pf_raw, "leading"
         else:
             return pf, "lagging"
     else:
-        if pf_raw > 1:
+        if pf_raw >= 1:
             return 2-pf_raw, "leading"
         else:
             return pf, "lagging"
