@@ -17,7 +17,7 @@ TIME_SLICE = 10.0
 #CSVHEADERS = '"Time", "Watts #1", "Watts #2", "Watts #3", "Watts #4", "Watts #5", "Watts #6", "Watts #7", "Watts #8", "Watts #9"'
 #READMETER = './hiking_dds238_2.py'
 #CSVHEADERS = '"Time","Voltage","Current","Power","Reactive power","Power factor","Frequency","Cumulative energy"'
-READMETER = './schneider_iEM2150.py'
+READMETER = './schneider_iEM2150_with_semaphore.py'
 CSVHEADERS = '"Time","Voltage","Current","Power","Reactive power","Power factor","Power factor direction","Frequency","Cumulative energy"'
 
 
