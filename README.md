@@ -4,7 +4,7 @@
 Target device is Raspberry Pi version 2 or later.
 Electrical meter with serial or modbus adapter is connected to RaPi.
 Uses RaPi blinkt LED hardware shield for status display.
-Currently supports Current Cost CC128 energy monitor and Hiking DDS238-2 ZN/S single phase meter.
+Currently supports Current Cost CC128 energy monitor, Hiking DDS238-2 ZN/S single phase meter and Schneider iEM2150 single phase meter.
 The project consists of the following files:
 
 ### `auto.sh`
