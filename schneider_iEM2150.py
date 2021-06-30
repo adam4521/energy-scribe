@@ -16,6 +16,9 @@ import os
 import glob
 import serial.tools.list_ports
 
+BAUDRATE = 9600
+
+
 # on Ubuntu, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
 # on Windows, serial ports are in the form 'COMx' where x is an integer 1-8
 def find_serial_device():
@@ -35,7 +38,7 @@ def find_serial_device():
 def configure(port):
     try:
         instrument = minimalmodbus.Instrument(port, 1, mode='rtu')
-        instrument.serial.baudrate = 9600
+        instrument.serial.baudrate = BAUDRATE
         instrument.serial.bytesize = 8
         instrument.serial.stopbits = 1
         instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -146,6 +149,7 @@ def print_all_readings(instrument):
         raise ConnectionError('Modbus error')
 
 
+# starts here
 
 try:
     port = find_serial_device()
