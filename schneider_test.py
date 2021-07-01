@@ -49,15 +49,13 @@ def get_readings():
 
 
 # starts here
-# the semaphore code allows communication with other process(es) so that they can
-# use the RS485 bus without collision.
 
 try:
    get_readings()
 
 except:
-    # if we reach here we likely have had an I/O error on the serial port.
-    sys.stderr.write("System error: probably serial port IO.\n")
-    sys.exit(1)
+   # if we reach here we likely have had an I/O error on the serial port.
+   sys.stderr.write("System error: probably serial port IO.\n")
+   sys.exit(1)
 
 
