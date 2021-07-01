@@ -1,53 +1,19 @@
 #!/usr/bin/env python3
+# Copyright 2021 Arup
+# MIT License
+
 import minimalmodbus
 import serial
-import os
+#import os
 import sys
-import time
-import glob
 
-semaphore = '/dev/shm/rs485.pid' + str(os.getpid()) + '.wants-it'
+PORT = '/dev/ttyUSB0'
+BAUDRATE = 9600
+TIMEOUT = 2    # wait for rs485_semaphore lock for up to 2 seconds
 
-def raise_semaphore():
-    try:
-        open(semaphore, 'w').close()
-        os.utime(semaphore, None)
-    except:
-        sys.stderr.write("Couldn't raise semaphore.\n")
-        exit(1)
-
-def clear_semaphore():
-    try:
-        os.unlink(semaphore)
-    except:
-        sys.stderr.write("Couldn't clear semaphore.\n")
-        exit(1)
-
-def check_semaphores():
-    return len(glob.glob('/dev/shm/rs485*'))
-
-def clear_other_semaphores():
-    try:	
-        for f in glob.glob('/dev/shm/rs485*'):
-            if f != semaphore:
-                os.unlink(f)
-    except:
-        sys.stderr.write("Couldn't delete/unlink semaphore file.\n")
-        exit(1)
-
-# starts here
-
-try:
-    raise_semaphore()
-    c = 0  # counter
-    while check_semaphores() > 1:
-        time.sleep(0.5)
-        c = c + 1
-        if c > 10:
-            clear_other_semaphores()  # don't wait forever, clear blockers eventually
-
-    instrument = minimalmodbus.Instrument('/dev/ttyUSB0', 1)
-    instrument.serial.baudrate = 9600
+def get_readings():
+    instrument = minimalmodbus.Instrument(PORT, 1)
+    instrument.serial.baudrate = BAUDRATE
     instrument.serial.parity = serial.PARITY_NONE
     instrument.serial.timeout = 0.5
     instrument.serial.stopbits = 1
@@ -80,12 +46,19 @@ try:
     print("Cumulative active energy: ", instrument.read_float(45099), "Wh")
     print("Cumulative reactive energy: ", instrument.read_float(45101), "VARh")
 
-    clear_semaphore()
 
+
+
+# starts here
+# the semaphore code allows communication with other process(es) so that they can
+# use the RS485 bus without collision.
+
+try:
+   get_readings()
 
 except:
-    sys.stderr.write("Failed to operate the serial port.\n")
-    clear_semaphore()
-    exit(1)
+    # if we reach here we likely have had an I/O error on the serial port.
+    sys.stderr.write("System error: probably serial port IO.\n")
+    sys.exit(1)
 
 
