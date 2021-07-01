@@ -9,7 +9,6 @@ import sys
 
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 9600
-TIMEOUT = 2    # wait for rs485_semaphore lock for up to 2 seconds
 
 def get_readings():
     instrument = minimalmodbus.Instrument(PORT, 1)
