@@ -107,7 +107,7 @@ def get_reading(instrument, register, decoder):
 
 def get_readings(instrument, register_map):
     result = { k:get_reading(instrument, register, decoder) \
-                   for register, length, decoder = register_map[k] \
+                   for register, length, decoder in register_map[k] \
                        for k in register_map.keys() }
     # apply timestamp
     result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
@@ -172,7 +172,8 @@ def print_all_readings(readings, as_json=False):
     if as_json:
         print(json.dumps(readings, sort_keys=False, indent=4))
     else:
-        print(f'{k:50}: readings[k]') for k in readings.keys()
+        for k in readings.keys():
+            print(f'{k:50}: readings[k]')
 
 
 # starts here
