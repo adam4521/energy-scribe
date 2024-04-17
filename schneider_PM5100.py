@@ -149,7 +149,7 @@ def print_all_readings(readings, as_json=False):
         print(json.dumps(readings, sort_keys=False, indent=4))
     else:
         for k in readings.keys():
-            print(f'{k:50}: readings[k]')
+            print(f'{k:50}: {readings[k]}')
 
 
 # starts here
