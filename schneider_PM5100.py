@@ -23,7 +23,7 @@ PM5100_REGISTER_MAP = {
     "manufacturer_label":                                        (70, 20, 'STRING40'),
     "product_label":                                             (30, 20, 'STRING40'),
     "serial_number_label":                                       (130, 2, 'INT32U'),
-    "firmware_version_status":                                   (1638, 4, 'FIRMWARE'), # 'A.B.D'
+    "firmware_version_status":                                   (1638, 4, 'FIRMWARE'), # 3 registers 'A.B.C'
     "line1_neutral_voltage_sensor":                              (3028, 2, 'FLOAT32'),
     "line2_neutral_voltage_sensor":                              (3030, 2, 'FLOAT32'),
     "line3_neutral_voltage_sensor":                              (3032, 2, 'FLOAT32'),
@@ -154,12 +154,15 @@ def print_all_readings(readings, as_json=False):
         print(json.dumps(filtered_readings, sort_keys=False, indent=4))
     else:
         for k in filtered_readings.keys():
-            print(f'{k:50}: {readings[k]}')
+            print(f'{k:60}: {readings[k]}')
 
 
 # starts here
 try:
-    output_json=False
+    if sys.argv[1] == '--json':
+        output_json = True
+    else:
+        output_json = False
     register_map = PM5100_REGISTER_MAP
     port = find_serial_device()
     print(f'Connecting to Modbus serial on port {port}.')
