@@ -106,43 +106,13 @@ def get_reading(instrument, register, decoder):
 
 
 def get_readings(instrument, register_map):
-    result = {}
-#     for k in register_map.keys():
-#         register, length, decoder = register_map[k]
-#         result[k] = get_reading(instrument, register, decoder)
-
     result = { k:get_reading(instrument, register, decoder) \
                    for k in register_map.keys() \
-                       for register, length, decoder in register_map[k] }
-
+                       for register, length, decoder in [register_map[k]] }
     # apply timestamp
     result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
     return result
 
-
-
-# def decode_from_registers(register_byte_array, register_start, register_end, decoder):
-#     # modbus registers are 16 bits wide, so index into memory byte array is *2
-#     bstart = register_start * 2
-#     bend = (register_end+1) * 2 
-#     data_bytes = register_byte_array[bstart:bend]
-#     if decoder == 'FLOAT32':
-#         output = [ struct.unpack('>f', register_byte_array[i:i+4]) for i in range(bstart, bend, 4) ] 
-#     elif decoder == 'INT16U':
-#         output = [ struct.unpack('>H', register_byte_array[i:i+2]) for i in range(bstart, bend, 2) ]
-#     elif decoder == 'INT32U':
-#         output = [ struct.unpack('>I', register_byte_array[i:i+4]) for i in range(bstart, bend, 4) ]
-#     elif decoder == 'INT64U':
-#         output = [ struct.unpack('>Q', register_byte_array[i:i+8]) for i in range(bstart, bend, 8) ]
-#     elif decoder == 'PF4Q':
-#         pf4q = [ struct.unpack('>f', register_byte_array[i:i+4]) for i in range(bstart, bend, 4) ] 
-#         output = [ v+1.0 if v<-1.0 else v-1.0 if v>1.0 else v for v in pf4q ] 
-#     elif decoder[:6] == 'STRING':
-#         output = struct.unpack('s', register_byte_array[bstart:bend])
-#     else:
-#         pass
-#     return output
-# 
 
 # on Ubuntu/Raspberry Pi, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
 # on Windows, serial ports are in the form 'COMx' where x is an integer 1-8
