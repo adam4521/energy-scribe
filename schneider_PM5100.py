@@ -95,8 +95,8 @@ def get_reading(instrument, register, decoder):
         vs = instrument.read_registers(reg_addr, 2)  
         output = (vs[0] << 16) + vs[1]
     elif decoder[:6] == 'STRING':
-        length = decoder[6:]
-        output = instrument.read(reg_addr, length//2)  # 2 characters per register
+        length = int(decoder[6:])
+        output = instrument.read_string(reg_addr, length//2)  # 2 characters per register
     elif decoder == 'PF4Q':
         output = pf_from_pf4q(instrument.read_float(reg_addr))
     else:
@@ -106,9 +106,15 @@ def get_reading(instrument, register, decoder):
 
 
 def get_readings(instrument, register_map):
-    result = { k:get_reading(instrument, register, decoder) \
-                   for register, length, decoder in register_map[k] \
-                       for k in register_map.keys() }
+    result = {}
+    for k in register_map.keys():
+        register, length, decoder = register_map[k]
+        result[k] = get_reading(instrument, register, decoder)
+
+    # result = { k:get_reading(instrument, register, decoder) \
+    #                for register, length, decoder in register_map[k] \
+    #                    for k in register_map.keys() }
+
     # apply timestamp
     result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
     return result
@@ -181,6 +187,7 @@ try:
     output_json=False
     register_map = PM5100_REGISTER_MAP
     port = find_serial_device()
+    print(f'Connecting to Modbus serial on port {port}.')
     instrument = configure(port)
     readings = get_readings(instrument, register_map)
     print_all_readings(readings, output_json)
