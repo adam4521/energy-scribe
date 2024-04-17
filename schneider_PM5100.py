@@ -124,12 +124,18 @@ def find_serial_device():
     ports = serial.tools.list_ports.comports()
     port_name = None
     for port in ports:
-        if 'serial' in port.description.lower():        
+        description = port.description
+        if 'serial' in description.lower() or 'uart' in description.lower():        
             print(f'Found {port.description}.')
             port_name = port.device
             break
     if port_name == None:
-        sys.stderr.write("Couldn't find serial device.\n")
+        print("Couldn't find serial device. Tried:", file=sys.stderr)
+        if len(ports) == 0:
+            print('None', file=sys.stderr)
+        else:        
+            for port in ports:
+                print(f'{port.device}: {port.description}', file=sys.stderr)
         raise ConnectionError('Modbus error')
     return port_name
  
