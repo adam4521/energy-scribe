@@ -146,7 +146,7 @@ def configure(port):
 
 def print_all_readings(readings, as_json=False):
     # filter readings to remove 'NaN' values (eg single phase application)
-    filtered_readings = [ k:readings[k] for k in readings.keys() if readings[k] != float('nan') ]
+    filtered_readings = { k:readings[k] for k in readings.keys() if readings[k] != float('nan') }
     if as_json:
         print(json.dumps(filtered_readings, sort_keys=False, indent=4))
     else:
