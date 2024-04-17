@@ -23,7 +23,7 @@ PM5100_REGISTER_MAP = {
     "manufacturer_label":                                        (70, 20, 'STRING40'),
     "product_label":                                             (30, 20, 'STRING40'),
     "serial_number_label":                                       (130, 2, 'INT32U'),
-    "firmware_version_status":                                   (1638, 4, 'INT16U'), # 'A.B.D'
+    "firmware_version_status":                                   (1638, 4, 'FIRMWARE'), # 'A.B.D'
     "line1_neutral_voltage_sensor":                              (3028, 2, 'FLOAT32'),
     "line2_neutral_voltage_sensor":                              (3030, 2, 'FLOAT32'),
     "line3_neutral_voltage_sensor":                              (3032, 2, 'FLOAT32'),
@@ -94,6 +94,9 @@ def get_reading(instrument, register, decoder):
     elif decoder == 'INT64U':
         vs = instrument.read_registers(reg_addr, 4)  
         output = (vs[0] << 48) + (vs[1] << 32) + (vs[2] << 16) + vs[3]
+    elif decoder == 'FIRMWARE':
+        vs = instrument.read_registers(reg_addr, 4)
+        output = f'{vs[0]}.{vs[1]}.{vs[3]}' 
     elif decoder[:6] == 'STRING':
         length = int(decoder[6:])
         output = instrument.read_string(reg_addr, length//2)  # 2 characters per register
