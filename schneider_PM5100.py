@@ -159,7 +159,7 @@ def print_all_readings(readings, as_json=False):
 
 # starts here
 try:
-    if sys.argv[1] == '--json':
+    if len(sys.argv) > 1 and sys.argv[1] == '--json':
         output_json = True
     else:
         output_json = False
