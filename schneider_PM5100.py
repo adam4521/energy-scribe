@@ -107,13 +107,13 @@ def get_reading(instrument, register, decoder):
 
 def get_readings(instrument, register_map):
     result = {}
-    for k in register_map.keys():
-        register, length, decoder = register_map[k]
-        result[k] = get_reading(instrument, register, decoder)
+#     for k in register_map.keys():
+#         register, length, decoder = register_map[k]
+#         result[k] = get_reading(instrument, register, decoder)
 
-    # result = { k:get_reading(instrument, register, decoder) \
-    #                for register, length, decoder in register_map[k] \
-    #                    for k in register_map.keys() }
+    result = { k:get_reading(instrument, register, decoder) \
+                   for k in register_map.keys() \
+                       for register, length, decoder in register_map[k] }
 
     # apply timestamp
     result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
@@ -144,7 +144,7 @@ def get_readings(instrument, register_map):
 #     return output
 # 
 
-# on Ubuntu, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
+# on Ubuntu/Raspberry Pi, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
 # on Windows, serial ports are in the form 'COMx' where x is an integer 1-8
 def find_serial_device():
     ports = serial.tools.list_ports.comports()
