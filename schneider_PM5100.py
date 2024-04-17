@@ -96,7 +96,7 @@ def get_reading(instrument, register, decoder):
         output = (vs[0] << 48) + (vs[1] << 32) + (vs[2] << 16) + vs[3]
     elif decoder == 'FIRMWARE':
         vs = instrument.read_registers(reg_addr, 4)
-        output = f'{vs[0]}.{vs[1]}.{vs[3]}' 
+        output = f'{vs[0]}.{vs[1]}.{vs[2]}' 
     elif decoder[:6] == 'STRING':
         length = int(decoder[6:])
         output = instrument.read_string(reg_addr, length//2)  # 2 characters per register
