@@ -100,6 +100,7 @@ def get_reading(instrument, register, decoder):
     elif decoder[:6] == 'STRING':
         length = int(decoder[6:])
         output = instrument.read_string(reg_addr, length//2)  # 2 characters per register
+        output = output.split('\x00',1)[0]       # drop everything after the first \x00 character
     elif decoder == 'PF4Q':
         output = pf_from_pf4q(instrument.read_float(reg_addr))
     else:
