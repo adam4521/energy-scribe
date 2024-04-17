@@ -122,12 +122,13 @@ def get_readings(instrument, register_map):
 # on Windows, serial ports are in the form 'COMx' where x is an integer 1-8
 def find_serial_device():
     ports = serial.tools.list_ports.comports()
-    port_name = ''
+    port_name = None
     for port in ports:
-        if port.device[0:11] == '/dev/ttyUSB' or port.device[0:3] == 'COM':
+        if 'serial' in port.description.lower():        
+            print(f'Found {port.description}.')
             port_name = port.device
             break
-    if port_name == '':
+    if port_name == None:
         sys.stderr.write("Couldn't find serial device.\n")
         raise ConnectionError('Modbus error')
     return port_name
@@ -164,11 +165,9 @@ try:
         output_json = True
     else:
         output_json = False
-    register_map = PM5100_REGISTER_MAP
     port = find_serial_device()
-    print(f'Connecting to Modbus serial on port {port}.')
     instrument = configure(port)
-    readings = get_readings(instrument, register_map)
+    readings = get_readings(instrument, PM5100_REGISTER_MAP)
     print_all_readings(readings, output_json)
 
 except ConnectionError:
