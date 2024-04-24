@@ -17,6 +17,7 @@ import glob
 import serial.tools.list_ports
 
 BAUDRATE = 9600
+MODBUS_ADDRESS = 1
 
 
 # on Ubuntu, serial ports are in the form '/dev/ttyUSBx' where x is an integer 0-7
@@ -37,7 +38,7 @@ def find_serial_device():
         
 def configure(port):
     try:
-        instrument = minimalmodbus.Instrument(port, 1, mode='rtu')
+        instrument = minimalmodbus.Instrument(port, MODBUS_ADDRESS, mode='rtu')
         instrument.serial.baudrate = BAUDRATE
         instrument.serial.bytesize = 8
         instrument.serial.stopbits = 1
