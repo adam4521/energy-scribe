@@ -95,66 +95,52 @@ def get_readings(instrument):
         sys.stderr.write('Failed to read instrument.\n')
         raise ConnectionError('Modbus error')
 
-def print_csv_all_readings(instrument):
-    try:
-        volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
-        output = '"' + str(get_timestamp()) +  '",' \
-                 + str(volts) + ',' \
-                 + str(amps) + ',' \
-                 + str(power) + ',' \
-                 + str(reactive_power) + ',' \
-                 + str(pf) + ',' \
-                 + '"' + pf_direction + '",' \
-                 + str(freq) + ',' \
-                 + str(energy) + '\n'
-        sys.stdout.write(output)
-    except:
-        sys.stderr.write('Failed to read instrument or write output.\n')
-        raise ConnectionError('Modbus or write error')
+
+def print_csv_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output = f'"{str(get_timestamp())}",{volts},{amps},{power},{reactive_power},{pf},"{pf_direction}",{freq},{energy}'
+    print(output)
 
 
-def print_json_all_readings(instrument):
-    try:
-        volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
-        output = '{"version": 1, ' +\
-                 '"timestamp": "' + get_timestamp() + '", ' +\
-                 '"points": {"voltage": {"present_value": ' + volts + '}, ' +\
-                 '"current": {"present_value": '            + amps + '}, ' +\
-                 '"power": {"present_value": '              + power + '}, ' +\
-                 '"reactive power": {"present_value": '     + reactive_power + '}, ' +\
-                 '"power factor": {"present_value": '       + pf + '}, ' +\
-                 '"power factor direction": {"present_value": ' + pf_direction + '}, ' +\
-                 '"frequency": {"present_value": '          + freq + '}, ' +\
-                 '"energy": {"present_value": '             + energy + '}}}\n'
-        # only write the output if we have successfully acquired the payload
-        sys.stdout.write(output)
-    except:
-        sys.stderr.write('Failed to complete read of instrument state.\n')
-        raise ConnectionError('Modbus error')
+def print_json_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output = f'''
+{{
+    "version": 1,
+    "timestamp": "{get_timestamp()}",
+    "points": {{
+        "voltage": {{"present_value": {volts}}},
+        "current": {{"present_value": {amps}}},
+        "power": {{"present_value": {power}}},
+        "reactive_power": {{"present_value": {reactive_power}}},
+        "power_factor": {{"present_value": {pf}}},
+        "power_factor_direction": {{"present_value": {pf_direction}}},
+        "frequency": {{"present_value": {freq}}},
+        "energy": {{"present_value": {energy}}}
+    }}
+}}'''
+    print(output)
 
-def print_all_readings(instrument):
-    try:
-        volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
-        output = volts + ' V\n' +\
-                 amps + ' A\n' +\
-                 power + ' W\n' +\
-                 reactive_power + ' VAR\n' +\
-                 pf + ' pf\n' +\
-                 pf_direction + ' pf direction\n' +\
-                 freq + ' Hz\n' +\
-                 energy + ' kWh\n'
-        sys.stdout.write(output)
-    except:
-        sys.stderr.write('Failed to complete read of instrument state.\n')
-        raise ConnectionError('Modbus error')
+
+def print_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output = f'''
+{volts} V
+{amps} A
+{power} W
+{reactive_power} VAR
+{pf} pf
+{pf_direction} pf direction
+{freq} Hz
+{energy} kWh'''
+    print(output)
 
 
 # starts here
-
 try:
     port = find_serial_device()
     instrument = configure(port)
-    print_csv_all_readings(instrument)
+    volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
+    #print_csv_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
+    #print_json_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
+    print_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
 
 except ConnectionError:
     sys.stderr.write('Error communicating with hardware.\n')
