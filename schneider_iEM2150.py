@@ -103,7 +103,7 @@ def print_csv_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf
 
 
 def print_json_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
-    output =
+    output = \
 f'''{{
     "version": 1,
     "timestamp": "{timestamp}",
@@ -122,7 +122,7 @@ f'''{{
 
 
 def print_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
-    output =
+    output = \
 f'''{timestamp}
 {volts} V
 {amps} A
