@@ -90,22 +90,23 @@ def get_readings(instrument):
         energy = instrument.read_float(45099)
             # typically sends 01 03 b0 2b 00 02 92 c3
             # and receives    01 03 04 43 2c d7 f7 30 08
-        return volts, amps, power, reactive_power, pf, pf_direction, freq, energy
+        timestamp = get_timestamp()
+        return timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy
     except:
         sys.stderr.write('Failed to read instrument.\n')
         raise ConnectionError('Modbus error')
 
 
-def print_csv_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
-    output = f'"{str(get_timestamp())}",{volts},{amps},{power},{reactive_power},{pf},"{pf_direction}",{freq},{energy}'
+def print_csv_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output = f'"{timestamp}",{volts},{amps},{power},{reactive_power},{pf},"{pf_direction}",{freq},{energy}'
     print(output)
 
 
-def print_json_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
-    output = f'''
-{{
+def print_json_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output =
+f'''{{
     "version": 1,
-    "timestamp": "{get_timestamp()}",
+    "timestamp": "{timestamp}",
     "points": {{
         "voltage": {{"present_value": {volts}}},
         "current": {{"present_value": {amps}}},
@@ -120,8 +121,9 @@ def print_json_all_readings(volts, amps, power, reactive_power, pf, pf_direction
     print(output)
 
 
-def print_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
-    output = f'''
+def print_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy):
+    output =
+f'''{timestamp}
 {volts} V
 {amps} A
 {power} W
@@ -137,10 +139,10 @@ def print_all_readings(volts, amps, power, reactive_power, pf, pf_direction, fre
 try:
     port = find_serial_device()
     instrument = configure(port)
-    volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
-    #print_csv_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
-    #print_json_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
-    print_all_readings(volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
+    timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy = get_readings(instrument)
+    #print_csv_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
+    #print_json_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
+    print_all_readings(timestamp, volts, amps, power, reactive_power, pf, pf_direction, freq, energy)
 
 except ConnectionError:
     sys.stderr.write('Error communicating with hardware.\n')
