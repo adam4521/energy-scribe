@@ -183,7 +183,6 @@ try:
     cmd_parser.add_argument('--csv', action='store_true', help='output in CSV format')
     cmd_parser.add_argument('--text', action='store_true', help='output in text format')
     args = cmd_parser.parse_args()
-    print(args)
 
     # connect to meter
     port = find_serial_device()
@@ -197,7 +196,7 @@ try:
     else:
         output_format = 'text'
     # create a CSV output object 
-    csv_writer = csv.writer(sys.stdout)
+    csv_writer = csv.writer(sys.stdout, lineterminator=os.linesep, newline='')
     # if we're outputting in CSV format, output the header first
     if output_format == 'csv':
         readings = get_readings(instrument, PM5100_REGISTER_MAP)
