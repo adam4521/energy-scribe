@@ -142,10 +142,10 @@ def find_serial_device():
  
 
         
-def configure(port, modbus_device_address):
+def configure(port, modbus_device_address, baudrate):
     try:
         instrument = minimalmodbus.Instrument(port, modbus_device_address, mode='rtu')
-        instrument.serial.baudrate = BAUDRATE
+        instrument.serial.baudrate = baudrate
         instrument.serial.bytesize = 8
         instrument.serial.stopbits = 1
         instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
@@ -186,7 +186,7 @@ try:
 
     # connect to meter
     port = find_serial_device()
-    instrument = configure(port, args.device_address)
+    instrument = configure(port, args.device_address, args.baudrate)
     if args.json:
         output_format = 'json'
     elif args.csv:
