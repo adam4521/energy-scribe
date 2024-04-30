@@ -15,9 +15,11 @@ import sys
 import os
 import glob
 import json
+import csv
 import serial.tools.list_ports
 
 BAUDRATE = 9600
+MODBUS_DEVICE_ADDRESS = 1
 
 PM5100_REGISTER_MAP = {
     "manufacturer_label":                                        (70, 20, 'STRING40'),
@@ -141,9 +143,9 @@ def find_serial_device():
  
 
         
-def configure(port):
+def configure(port, modbus_device_address):
     try:
-        instrument = minimalmodbus.Instrument(port, 1, mode='rtu')
+        instrument = minimalmodbus.Instrument(port, modbus_device_address, mode='rtu')
         instrument.serial.baudrate = BAUDRATE
         instrument.serial.bytesize = 8
         instrument.serial.stopbits = 1
@@ -155,32 +157,49 @@ def configure(port):
         raise ConnectionError('Modbus error')
 
 
-def print_all_readings(readings, as_json=False):
+def filtered_readings(readings):
     # filter readings to remove 'NaN' values (eg single phase application)
     filtered_readings = { k:readings[k] for k in readings.keys() if readings[k] == readings[k] }
-    if as_json:
-        print(json.dumps(filtered_readings, sort_keys=False, indent=4))
-    else:
-        for k in filtered_readings.keys():
+    return filtered_readings
+
+
+def print_readings(readings, output_format, csv_writer):
+    if output_format == 'json':
+        print(json.dumps(filtered_readings(readings), sort_keys=False, indent=4))
+    elif output_format == 'csv':
+        print(filtered_readings(readings))
+    elif output_format == 'text':
+        for k in filtered_readings(readings).keys():
             print(f'{k:60}: {readings[k]}')
 
 
 # starts here
 try:
-    if len(sys.argv) > 1 and sys.argv[1] == '--json':
-        output_json = True
+    output_formats = { '--json': 'json', '--csv': 'csv', '--text': 'text' }
+    if len(sys.argv) > 1:
+        output_format = output_formats[sys.argv[1]]
     else:
-        output_json = False
+        output_format = 'text'
     port = find_serial_device()
-    instrument = configure(port)
+    instrument = configure(port, MODBUS_DEVICE_ADDRESS)
+
+    # create a CSV output object 
+    csv_writer = csv.writer(sys.stdout)
+    # if we're outputting in CSV format, output the header first
+    if output_format == 'csv':
+        readings = get_readings(instrument, PM5100_REGISTER_MAP)
+        csv_writer.writerow(filtered_readings(readings).keys())
     readings = get_readings(instrument, PM5100_REGISTER_MAP)
-    print_all_readings(readings, output_json)
+    print_readings(readings, output_format, csv_writer)
+
 
 except ConnectionError:
-    sys.stderr.write('Error communicating with hardware.\n')
+    print("Error: failed attempt to communicate with hardware.", file=sys.stderr)
     sys.exit(1)
 
-
+except KeyError:
+    print('Error: invalid output option, must be --csv, --json or --txt', file=sys.stderr)
+    sys.exit(1)
 
         
 
