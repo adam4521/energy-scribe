@@ -180,8 +180,8 @@ try:
     cmd_parser.add_argument('--json', action='store_true', help='output in JSON format')
     cmd_parser.add_argument('--csv', action='store_true', help='output in CSV format')
     cmd_parser.add_argument('--text', action='store_true', help='output in text format')
-    cmd_parser.add_argument('--device_address', nargs='?', default=1, help='modbus address of meter')
-    cmd_parser.add_argument('--baudrate', nargs='?', default=9600, help='RS485 communication baud rate')
+    cmd_parser.add_argument('--device_address', type=int, nargs='?', default=1, help='modbus address of meter')
+    cmd_parser.add_argument('--baudrate', nargs='?', type=int, default=9600, help='RS485 communication baud rate')
     args = cmd_parser.parse_args()
 
     # connect to meter
