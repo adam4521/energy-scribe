@@ -19,8 +19,6 @@ import csv
 import argparse
 import serial.tools.list_ports
 
-BAUDRATE = 9600
-MODBUS_DEVICE_ADDRESS = 1
 
 PM5100_REGISTER_MAP = {
     "manufacturer_label":                                        (70, 20, 'STRING40'),
@@ -73,11 +71,11 @@ def pf_from_pf4q(pf4q):
     if pf4q != pf4q:
         pf = 1.0
     # quadrant II, negative real power, positive reactive power
-    elif pf4q < -1.0:
-        pf = pf4q + 1.0
+    elif pf4q < -1:
+        pf = -2 - pf4q
     # quadrant IV, positive real power, negative reactive power
-    elif pf4q > 1.0:
-        pf = pf4q - 1.0
+    elif pf4q > 1:
+        pf = 2 - pf4q
     # quadrant I, positive real power, positive reactive power
     # quadrant III, negative real power, negative reactive power
     else:
@@ -177,16 +175,18 @@ def print_readings(readings, output_format, csv_writer):
 # starts here
 try:
     cmd_parser = argparse.ArgumentParser(description='Read data from Schneider PM5100 energy meter.')
-    cmd_parser.add_argument('--interval', type=int, default=5, nargs='?', help='interval in seconds between successive readings')
+    cmd_parser.add_argument('--interval', type=int, nargs='?', default=5, help='interval in seconds between successive readings')
     cmd_parser.add_argument('--quantity', type=int, nargs='?', default=1, help='total number of readings')
     cmd_parser.add_argument('--json', action='store_true', help='output in JSON format')
     cmd_parser.add_argument('--csv', action='store_true', help='output in CSV format')
     cmd_parser.add_argument('--text', action='store_true', help='output in text format')
+    cmd_parser.add_argument('--device_address', nargs='?', default=1, help='modbus address of meter')
+    cmd_parser.add_argument('--baudrate', nargs='?', default=9600, help='RS485 communication baud rate')
     args = cmd_parser.parse_args()
 
     # connect to meter
     port = find_serial_device()
-    instrument = configure(port, MODBUS_DEVICE_ADDRESS)
+    instrument = configure(port, args.device_address)
     if args.json:
         output_format = 'json'
     elif args.csv:
