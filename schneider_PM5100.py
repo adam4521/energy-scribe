@@ -16,6 +16,7 @@ import os
 import glob
 import json
 import csv
+import argparse
 import serial.tools.list_ports
 
 BAUDRATE = 9600
@@ -167,7 +168,7 @@ def print_readings(readings, output_format, csv_writer):
     if output_format == 'json':
         print(json.dumps(filtered_readings(readings), sort_keys=False, indent=4))
     elif output_format == 'csv':
-        print(filtered_readings(readings))
+        csv_writer.writerow(filtered_readings(readings).values())
     elif output_format == 'text':
         for k in filtered_readings(readings).keys():
             print(f'{k:60}: {readings[k]}')
@@ -175,33 +176,45 @@ def print_readings(readings, output_format, csv_writer):
 
 # starts here
 try:
-    output_formats = { '--json': 'json', '--csv': 'csv', '--text': 'text' }
-    if len(sys.argv) > 1:
-        output_format = output_formats[sys.argv[1]]
-    else:
-        output_format = 'text'
+    cmd_parser = argparse.ArgumentParser(description='Read data from Schneider PM5100 energy meter.')
+    cmd_parser.add_argument('--interval', type=int, default=5, nargs='?', help='interval in seconds between successive readings')
+    cmd_parser.add_argument('--quantity', type=int, nargs='?', default=1, help='total number of readings')
+    cmd_parser.add_argument('--json', action='store_true', help='output in JSON format')
+    cmd_parser.add_argument('--csv', action='store_true', help='output in CSV format')
+    cmd_parser.add_argument('--text', action='store_true', help='output in text format')
+    args = cmd_parser.parse_args()
+    print(args)
+
+    # connect to meter
     port = find_serial_device()
     instrument = configure(port, MODBUS_DEVICE_ADDRESS)
-
+    if args.json:
+        output_format = 'json'
+    elif args.csv:
+        output_format = 'csv'
+    elif args.text:
+        output_format = 'text'
+    else:
+        output_format = 'text'
     # create a CSV output object 
     csv_writer = csv.writer(sys.stdout)
     # if we're outputting in CSV format, output the header first
     if output_format == 'csv':
         readings = get_readings(instrument, PM5100_REGISTER_MAP)
         csv_writer.writerow(filtered_readings(readings).keys())
-    readings = get_readings(instrument, PM5100_REGISTER_MAP)
-    print_readings(readings, output_format, csv_writer)
-
+    # figure out starting time in seconds (since epoch)
+    start_time = int(time.time())
+    # now output the required number of readings
+    for i in range(args.quantity):
+        readings = get_readings(instrument, PM5100_REGISTER_MAP)
+        print_readings(readings, output_format, csv_writer)
+        while (int(time.time()) - start_time) % args.interval != 0:
+            time.sleep(0.1)   # pause briefly until the right interval is reached
 
 except ConnectionError:
     print("Error: failed attempt to communicate with hardware.", file=sys.stderr)
     sys.exit(1)
 
-except KeyError:
-    print('Error: invalid output option, must be --csv, --json or --txt', file=sys.stderr)
-    sys.exit(1)
-
-        
 
 
 
