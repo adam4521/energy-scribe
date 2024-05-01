@@ -196,7 +196,9 @@ try:
     else:
         output_format = 'text'
     # create a CSV output object 
-    csv_writer = csv.writer(sys.stdout, lineterminator=os.linesep)
+    # we use \n rather than os.linesep because the file sys.stdout is already open and
+    # the stream object will convert the \n to \r\n on Windows.
+    csv_writer = csv.writer(sys.stdout, lineterminator='\n')
     # if we're outputting in CSV format, output the header first
     if output_format == 'csv':
         readings = get_readings(instrument, PM5100_REGISTER_MAP)
