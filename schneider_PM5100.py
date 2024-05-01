@@ -196,7 +196,7 @@ try:
     else:
         output_format = 'text'
     # create a CSV output object 
-    csv_writer = csv.writer(sys.stdout, lineterminator=os.linesep, newline='')
+    csv_writer = csv.writer(sys.stdout, lineterminator=os.linesep)
     # if we're outputting in CSV format, output the header first
     if output_format == 'csv':
         readings = get_readings(instrument, PM5100_REGISTER_MAP)
