@@ -115,7 +115,8 @@ def get_readings(instrument, register_map):
                    for k in register_map.keys() \
                        for register, length, decoder in [register_map[k]] }
     # apply timestamp
-    result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
+#    result['timestamp'] = datetime.datetime.utcnow().isoformat('T')+'Z'
+    result['timestamp'] = datetime.datetime.now(datetime.UTC).isoformat('T')+'Z'
     return result
 
 
@@ -126,7 +127,7 @@ def find_serial_device():
     port_name = None
     for port in ports:
         description = port.description
-        if 'serial' in description.lower() or 'uart' in description.lower():        
+        if 'serial' in description.lower() or 'uart' in description.lower() or 'keyspan' in description.lower():        
             print(f'Found {port.description}.')
             port_name = port.device
             break
@@ -172,6 +173,11 @@ def print_readings(readings, output_format, csv_writer):
             print(f'{k:60}: {readings[k]}')
 
 
+def close_modbus():
+    if instrument in globals():
+        instrument.serial.close()
+
+
 # starts here
 try:
     cmd_parser = argparse.ArgumentParser(description='Read data from Schneider PM5100 energy meter.')
@@ -187,6 +193,8 @@ try:
     # connect to meter
     port = find_serial_device()
     instrument = configure(port, args.device_address, args.baudrate)
+    # wait for connection to be established on hardware before beginning communications
+    time.sleep(0.5)
     if args.json:
         output_format = 'json'
     elif args.csv:
@@ -212,10 +220,9 @@ try:
         while (int(time.time()) - start_time) % args.interval != 0:
             time.sleep(0.1)   # pause briefly until the right interval is reached
 
-except ConnectionError:
+except:
     print("Error: failed attempt to communicate with hardware.", file=sys.stderr)
     sys.exit(1)
-
 
 
 
