@@ -1,24 +1,31 @@
 #!/usr/bin/env python
 
-# Custom udev rules are required to recognise the USB identifiers of the GW-Instek GDM-8342 multimeter.
-# These rules are not needed for the GDM-9341 multimeter.
+# Custom udev rules are required to recognise the USB identifiers of the GW-Instek GDM-8042 multimeter.
+# These rules are NOT NEEDED for the GDM-9041 multimeter.
+#
 # Proceed as follows:
 # 1. Edit the rule file:
 # sudo nano /etc/udev/rules.d/10-force-serial.rules
-# 2. Enter the parameters:
+#
+# 2. Enter the parameters for the GDM-8342 multimeter:
 # SUBSYSTEM=="usb", ATTRS{idVendor}=="2184", ATTRS{idProduct}=="003d", MODE="0666", GROUP="dialout", RUN+="/sbin/modprobe cp210x", RUN+="/bin/sh -c 'echo 2184 003d > /sys/bus/usb-serial/drivers/cp210x/new_id'"
+# [ In the event that custom rules are required for GDM-9041, the idVendor is 0x2184 and the idProduct is 0x008d]
+#
 # 3. Restart the sub-system:
 # sudo udevadm control --reload-rules
 # sudo udevadm trigger
-
+#
+# 4. Add the user account or service account to the dialout group
+# sudo usermod -aG dialout $USER
+#
 # *********** WORK IN PROGRESS *************
 
 import serial
 import time
 
 
-def identify_gdm9041(port_path="/dev/ttyACM0"):
-    print(f"Testing port {port_path} for GW-Instek GDM-9041...")
+def identify_gdm_meter(port_path="/dev/ttyACM0"):
+    print(f"Testing port {port_path} for GW-Instek multimeter...")
     
     try:
         # Open port with a strict timeout to prevent blocking indefinitely
@@ -49,8 +56,12 @@ def identify_gdm9041(port_path="/dev/ttyACM0"):
             print(f"✅ Success! Found GDM-9041 on {port_path}")
             print(f"Device Identity: {response}")
             return True
+        elif "GWInstek" in response and "GDM8342" in response:
+            print(f"✅ Success! Found GDM-8342 on {port_path}")
+            print(f"Device Identity: {response}")
+            return True
         else:
-            print(f"❌ Device on {port_path} responded, but it is not the GDM-9041.")
+            print(f"❌ Device on {port_path} responded, but it is not the GDM-8342 or GDM-9041.")
             print(f"Received: {repr(response)}")
             return False
             
@@ -72,7 +83,7 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
             timeout=2.0
         )
         
-        print("Initializing GDM-9041...")
+        print("Initializing meter...")
         ser.write(b"*RST\n")
         time.sleep(0.5) # Allow hardware a moment to reset nodes
         
@@ -119,7 +130,7 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
             ser.close()
 
 if __name__ == "__main__":
-    if identify_gdm9041("/dev/ttyACM0"):
+    if identify_gdm_meter("/dev/ttyACM0"):
         setup_and_poll_meter()
 
 
