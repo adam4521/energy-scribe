@@ -25,6 +25,9 @@ import time
 
 BAUDRATE=9600                 # Set to match what is configured in your DMM Menu
 DEVICE_FILE='/dev/ttyUSB0'    # Set to match what is assigned by operating system
+DCV_RANGE='1000'
+DCI_RANGE='0.5'
+
 
 def identify_gdm_meter(port_path="/dev/ttyACM0"):
     print(f"Testing port {port_path} for GW-Instek multimeter...")
@@ -90,25 +93,25 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
         )
         
         print("Initializing meter...")
-        ser.write(b"*CLS\n")
-        ser.write(b"*RST\n")
+        ser.write(b'*CLS\n')
+        ser.write(b'*RST\n')
         time.sleep(0.5) # Allow hardware a moment to reset nodes
         
         # Configure Primary - 1000V DC
-        ser.write(b'CONF:VOLT:DC 1000\n')
+        ser.write(f'CONF:VOLT:DC {DCV_RANGE}\n'.encode('utf-8'))
         
         # Configure Secondary - 500mA DC (0.5A)
-        ser.write(b'CONF2:CURR:DC 0.5\n')
+        ser.write(f'CONF2:CURR:DC {DCI_RANGE}\n'.encode('utf-8'))
         time.sleep(0.5) # Allow internal ADC loops to sync up
         
-        print("Setup complete. Starting loop at 5-second intervals. Press Ctrl+C to stop.\n")
+        print('Setup complete. Starting loop at 5-second intervals. Press Ctrl+C to stop.\n')
         
         while True:
             # Clear internal buffers to guarantee fresh data
             ser.reset_input_buffer()
             
             # Query dual values
-            ser.write(b"READ?\n")
+            ser.write(b'READ?\n')
             raw_data = ser.readline().decode('utf-8').strip()
             
             if raw_data:
