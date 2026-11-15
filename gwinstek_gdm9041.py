@@ -23,6 +23,8 @@
 import serial
 import time
 
+BAUDRATE=9600                 # Set to match what is configured in your DMM Menu
+DEVICE_FILE='/dev/ttyUSB0'    # Set to match what is assigned by operating system
 
 def identify_gdm_meter(port_path="/dev/ttyACM0"):
     print(f"Testing port {port_path} for GW-Instek multimeter...")
@@ -32,7 +34,7 @@ def identify_gdm_meter(port_path="/dev/ttyACM0"):
         # GDM-9041 defaults to 8N1 (8 data bits, no parity, 1 stop bit)
         ser = serial.Serial(
             port=port_path,
-            baudrate=115200,   # Set to match what is configured in your DMM Menu
+            baudrate=BAUDRATE,
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
@@ -52,16 +54,20 @@ def identify_gdm_meter(port_path="/dev/ttyACM0"):
         ser.close()
         
         # 4. Parse response to see if it belongs to your meter
-        if "GWInstek" in response and "GDM9041" in response:
+        if "GWInstek" in response and "GDM-9041" in response:
             print(f"✅ Success! Found GDM-9041 on {port_path}")
             print(f"Device Identity: {response}")
             return True
-        elif "GWInstek" in response and "GDM8342" in response:
+        elif "GWInstek" in response and "GDM-8342" in response:
+            print(f"✅ Success! Found GDM-8342 on {port_path}")
+            print(f"Device Identity: {response}")
+            return True
+        elif "ISO-TECH" in response and "IDM-8342" in response:
             print(f"✅ Success! Found GDM-8342 on {port_path}")
             print(f"Device Identity: {response}")
             return True
         else:
-            print(f"❌ Device on {port_path} responded, but it is not the GDM-8342 or GDM-9041.")
+            print(f"❌ Device on {port_path} responded, but it is not the GDM-8342, IDM-8342 or GDM-9041.")
             print(f"Received: {repr(response)}")
             return False
             
@@ -76,7 +82,7 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
         # Open connection (GDM-9041 USBCDC default protocol: 8N1)
         ser = serial.Serial(
             port=port_path,
-            baudrate=115200, 
+            baudrate=BAUDRATE, 
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
@@ -84,16 +90,15 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
         )
         
         print("Initializing meter...")
+        ser.write(b"*CLS\n")
         ser.write(b"*RST\n")
         time.sleep(0.5) # Allow hardware a moment to reset nodes
         
         # Configure Primary - 1000V DC
-        ser.write(b'SENS:FUNC "VOLT:DC"\n')
-        ser.write(b'SENS:VOLT:DC:RANG 1000\n')
+        ser.write(b'CONF:VOLT:DC 1000\n')
         
         # Configure Secondary - 500mA DC (0.5A)
-        ser.write(b'SENS2:FUNC "CURR:DC"\n')
-        ser.write(b'SENS2:CURR:DC:RANG 0.5\n')
+        ser.write(b'CONF2:CURR:DC 0.5\n')
         time.sleep(0.5) # Allow internal ADC loops to sync up
         
         print("Setup complete. Starting loop at 5-second intervals. Press Ctrl+C to stop.\n")
@@ -103,7 +108,7 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
             ser.reset_input_buffer()
             
             # Query dual values
-            ser.write(b"VAL2?\n")
+            ser.write(b"READ?\n")
             raw_data = ser.readline().decode('utf-8').strip()
             
             if raw_data:
@@ -113,8 +118,12 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
                     
                     voltage = float(volt_raw)
                     current = float(curr_raw) * 1000 # Convert Amps to mA for readable logs
+                    power = voltage * current / 1000
                     
-                    print(f"[{time.strftime('%X')}] Voltage: {voltage:7.2f} V | Current: {current:7.2f} mA")
+                    print(f"[{time.strftime('%X')}] "
+                          f"Voltage: {voltage:7.2f} V | "
+                          f"Current: {current:7.2f} mA | "
+                          f"Current: {power:7.2f} W")
                 except ValueError:
                     print(f"Parsing error. Raw payload received: {raw_data}")
             else:
@@ -130,10 +139,6 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
             ser.close()
 
 if __name__ == "__main__":
-    if identify_gdm_meter("/dev/ttyACM0"):
-        setup_and_poll_meter()
+    if identify_gdm_meter(DEVICE_FILE):
+        setup_and_poll_meter(DEVICE_FILE)
 
-
-
-
- 
