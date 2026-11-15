@@ -66,7 +66,7 @@ def identify_gdm_meter(port_path="/dev/ttyACM0"):
             print(f"Device Identity: {response}")
             return True
         elif "ISO-TECH" in response and "IDM-8342" in response:
-            print(f"✅ Success! Found GDM-8342 on {port_path}")
+            print(f"✅ Success! Found IDM-8342 on {port_path}")
             print(f"Device Identity: {response}")
             return True
         else:
@@ -126,7 +126,7 @@ def setup_and_poll_meter(port_path="/dev/ttyACM0"):
                     print(f"[{time.strftime('%X')}] "
                           f"Voltage: {voltage:7.2f} V | "
                           f"Current: {current:7.2f} mA | "
-                          f"Current: {power:7.2f} W")
+                          f"Power: {power:7.2f} W")
                 except ValueError:
                     print(f"Parsing error. Raw payload received: {raw_data}")
             else:
